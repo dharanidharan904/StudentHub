@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudentHub</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0E6B5C">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F6F4;--card:#fff;--ink:#17231F;--mut:#5E6B66;--line:#E2E6E3;--acc:#0E6B5C;--accb:#E3F1EE;--red:#C23B2E;--redb:#FBE9E6;--org:#B4570F;--orgb:#FCEEDD;--yel:#8A6A00;--yelb:#FBF3D0;--grn:#2E7D4F;--grnb:#E2F3E8;--blu:#3B5A8C;--blub:#E6ECF6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1613;--card:#18211D;--ink:#E8EFEB;--mut:#93A39B;--line:#2A3732;--acc:#4CC3AE;--accb:#173B34;--red:#FF8A7A;--redb:#3A1D19;--org:#F0A25C;--orgb:#3A2812;--yel:#E6C24D;--yelb:#352D0C;--grn:#6FD197;--grnb:#16301F;--blu:#8FB0E8;--blub:#1C2A42}}
+:root[data-theme=dark]{--bg:#0F1613;--card:#18211D;--ink:#E8EFEB;--mut:#93A39B;--line:#2A3732;--acc:#4CC3AE;--accb:#173B34;--red:#FF8A7A;--redb:#3A1D19;--org:#F0A25C;--orgb:#3A2812;--yel:#E6C24D;--yelb:#352D0C;--grn:#6FD197;--grnb:#16301F;--blu:#8FB0E8;--blub:#1C2A42}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Figtree,system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.bar{max-width:1040px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}.logo i{width:26px;height:26px;border-radius:7px;background:var(--acc);display:grid;place-items:center;color:var(--card);font-style:normal;font-size:14px}
+.sp{flex:1}.seg{display:flex;background:var(--bg);border-radius:10px;padding:3px}.seg button{border:0;background:none;padding:5px 12px;border-radius:8px;color:var(--mut);font-weight:500}.seg .on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px #0002}
+.ib{border:1px solid var(--line);background:var(--card);border-radius:10px;width:38px;height:38px;position:relative}.dot{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;border-radius:9px;font-size:11px;padding:0 5px;min-width:18px}
+nav{max-width:1040px;margin:auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}nav button{border:0;background:none;padding:8px 12px;color:var(--mut);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap}nav .on{color:var(--acc);border-color:var(--acc)}
+main{max-width:1040px;margin:auto;padding:20px 16px 60px}h1{font-size:26px;margin:0 0 4px}h2{font-size:17px;margin:26px 0 10px}p{margin:0}.mut{color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:16px 0}
+.st{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.st b{font-size:26px;display:block;line-height:1.1}.st span{color:var(--mut);font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.tools input,.tools select,.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 10px}.tools input{flex:1;min-width:160px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:8px 0}.chips button{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:4px 12px;white-space:nowrap}.chips .on{background:var(--acc);border-color:var(--acc);color:var(--card)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:5px solid var(--bl,var(--line))}
+.card h3{margin:0;font-size:16px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--mut);font-size:13px;margin:8px 0}
+.b{font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px;background:var(--bb);color:var(--bc)}
+.URGENT,.OVERDUE{--bb:var(--redb);--bc:var(--red);--bl:var(--red)}.HIGH{--bb:var(--orgb);--bc:var(--org);--bl:var(--org)}.MEDIUM{--bb:var(--yelb);--bc:var(--yel);--bl:var(--yel)}.NORMAL,.LOW{--bb:var(--blub);--bc:var(--blu);--bl:var(--line)}.DONE,.COMPLETED{--bb:var(--grnb);--bc:var(--grn);--bl:var(--grn)}.SUBMITTED,.VERIFICATION_PENDING,.PENDING{--bb:var(--accb);--bc:var(--acc)}
+.btn{border:0;background:var(--acc);color:var(--card);padding:8px 16px;border-radius:10px;font-weight:600}.btn.g{background:none;border:1px solid var(--line);color:var(--ink)}.btn.sm{padding:4px 10px;font-size:13px}
+.empty{text-align:center;padding:36px 12px;color:var(--mut);border:1px dashed var(--line);border-radius:14px}
+.flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--accb);color:var(--acc);padding:10px 14px;border-radius:12px;font-size:13px;font-weight:500}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:500;font-size:13px}
+.wrap{overflow-x:auto}.prog{height:7px;background:var(--line);border-radius:4px;min-width:70px}.prog i{display:block;height:100%;background:var(--acc);border-radius:4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.bars div{display:grid;grid-template-columns:50px 1fr 40px;gap:8px;align-items:center;margin:8px 0;font-size:13px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.f label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut)}.f .w{grid-column:1/-1}.err{color:var(--red);font-size:12px}
+.ov{position:fixed;inset:0;background:#0007;display:grid;place-items:center;z-index:20;padding:16px}.modal{background:var(--card);border-radius:16px;padding:20px;max-width:440px;width:100%}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(380px,100%);background:var(--card);z-index:30;padding:16px;overflow:auto;border-left:1px solid var(--line)}
+.nt{padding:10px 0;border-bottom:1px solid var(--line)}.nt.u{border-left:3px solid var(--acc);padding-left:10px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;z-index:40}
+@media(prefers-reduced-motion:no-preference){.toast{animation:t .2s}@keyframes t{from{opacity:0;transform:translate(-50%,8px)}}}
+</style></head><body>
+<div id="app"></div>
+<script>
+const D=864e5,DEPTS=['CSE','ECE','EEE','MECH','CIVIL'],$=s=>document.querySelector(s);
+const T=h=>Date.now()+h*36e5;
+let students=[],actions=[],sa={},notes=[];
+const match=(a,s)=>(!a.d||a.d==s.d)&&(!a.y||a.y==s.y)&&(!a.s||a.s==s.s);
+
+const eff=(a,s)=>{const x=sa[s.id+':'+a.id];if(!x)return a.dl<Date.now()?'OVERDUE':'PENDING';return x.st=='PENDING'&&a.dl<Date.now()?'OVERDUE':x.st};
+function level(a,st){ // deterministic priority engine
+ if(st=='COMPLETED'||st=='SUBMITTED'||st=='VERIFICATION_PENDING')return'DONE';
+ const left=a.dl-Date.now();if(left<0)return'OVERDUE';
+ const days=left/D;if(days<=1)return a.p=='HIGH'||a.p=='URGENT'||new Date(a.dl).getDate()==new Date().getDate()?'URGENT':'HIGH';
+ if(days<=3)return a.p=='URGENT'?'URGENT':a.p=='HIGH'?'HIGH':'MEDIUM';
+ if(days<=7)return a.p=='URGENT'||a.p=='HIGH'?'MEDIUM':'NORMAL';return a.p=='LOW'?'LOW':'NORMAL'}
+function left(dl){const m=dl-Date.now(),d=Math.ceil(Math.abs(m)/D);
+ if(m<0){const h=Math.floor(-m/36e5);return h<24?'Overdue by '+Math.max(h,1)+'h':'Overdue by '+Math.floor(-m/D)+' days'}
+ const dd=new Date(dl),n=new Date();if(dd.toDateString()==n.toDateString())return'Due today, '+dd.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+ const tm=new Date(n.getTime()+D);if(dd.toDateString()==tm.toDateString())return'Due tomorrow';return Math.ceil(m/D)+' days left'}
+let me=null;let S={role:'student',tab:'home',f:'Pending',q:'',sort:'deadline',sel:null,notif:false,mod:null,errs:{},fa:'all'};
+const stats=a=>{const l=students.filter(s=>match(a,s)).map(s=>eff(a,s));const c=l.filter(x=>x=='COMPLETED').length,o=l.filter(x=>x=='OVERDUE').length;return{n:l.length,c,o,p:l.length-c-o,rate:l.length?Math.round(c/l.length*100):0}};
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.append(e);setTimeout(()=>e.remove(),2200)}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tgt=a=>[a.d||'All depts',a.y?'Year '+a.y:'All years',a.s?'Sec '+a.s:'All sections'].join(', ');
+const tl=s=>s.replace(/_/g,' ').toLowerCase().replace(/^./,c=>c.toUpperCase());
+function mine(){return actions.filter(a=>a.status!='DRAFT'&&sa[me.id+':'+a.id]).map(a=>({a,st:eff(a,me)})).map(o=>({...o,lv:level(o.a,o.st)}))}
+function card(o){const{a,st,lv}=o,done=lv=='DONE';return`<div class="card ${lv}"><div class="row"><h3>${esc(a.t)}</h3><span class="sp"></span><span class="b ${lv}">${lv=='DONE'?'Done':lv=='OVERDUE'?'⚠ Overdue':tl(lv)}</span></div><p class="mut">${esc(a.ds)}</p><div class="meta"><span>${tl(a.ty)}</span><span>${done?(sa[me.id+':'+a.id].at?'Completed '+sa[me.id+':'+a.id].at:'Submitted'):left(a.dl)}</span><span class="b ${st}">${tl(st)}</span></div>${done?'':`<button class="btn" data-open="${a.id}">Complete now</button>`}</div>`}
+function student(){const all=mine(),pend=all.filter(o=>o.lv!='DONE'),soon=pend.filter(o=>o.lv!='OVERDUE'&&o.a.dl-Date.now()<3*D);
+ const h=new Date().getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+ if(S.tab=='history'){const d=all.filter(o=>o.lv=='DONE');return`<h1>History</h1><p class="mut">Everything you have finished.</p><h2></h2>${d.length?d.map(card).join(''):'<div class="empty">Nothing completed yet.</div>'}`}
+ let list=all.filter(o=>({All:1,Pending:o.lv!='DONE',Urgent:o.lv=='URGENT','Due soon':o.lv!='DONE'&&o.lv!='OVERDUE'&&o.a.dl-Date.now()<3*D,Completed:o.lv=='DONE',Overdue:o.lv=='OVERDUE'}[S.f]))
+  .filter(o=>(o.a.t+o.a.ty).toLowerCase().includes(S.q.toLowerCase()));
+ const rk={OVERDUE:0,URGENT:1,HIGH:2,MEDIUM:3,NORMAL:4,LOW:5,DONE:6};
+ list.sort((x,y)=>S.sort=='priority'?rk[x.lv]-rk[y.lv]:S.sort=='new'?y.a.c-x.a.c:(x.lv=='DONE')-(y.lv=='DONE')||x.a.dl-y.a.dl);
+ return`<h1>${g}, ${me.name.split(' ')[0]}</h1><p class="mut">${pend.length?`You have ${pend.length} thing${pend.length>1?'s':''} to finish.`:'You’re all caught up! 🎉'}</p>
+ <div class="stats"><div class="st"><b>${all.length}</b><span>Total</span></div><div class="st"><b>${pend.length}</b><span>Pending</span></div><div class="st"><b>${soon.length}</b><span>Due soon</span></div><div class="st"><b style="color:var(--grn)">${all.length-pend.length}</b><span>Completed</span></div><div class="st"><b style="color:var(--red)">${all.filter(o=>o.lv=='OVERDUE').length}</b><span>Overdue</span></div></div>
+ <div class="tools"><input id="q" placeholder="Search by title or type" aria-label="Search actions" value="${esc(S.q)}"><select id="sort" aria-label="Sort"><option value="deadline">Sort: Deadline</option><option value="priority" ${S.sort=='priority'?'selected':''}>Sort: Priority</option><option value="new" ${S.sort=='new'?'selected':''}>Sort: Recently added</option></select></div>
+ <div class="chips">${['All','Pending','Due soon','Urgent','Overdue','Completed'].map(f=>`<button class="${S.f==f?'on':''}" data-f="${f}">${f}</button>`).join('')}</div>
+ ${list.length?list.map(card).join(''):'<div class="empty">'+(S.f=='Pending'&&!S.q?(all.length?'You’re all caught up! 🎉':'No actions assigned yet. New ones will appear here.'):'No actions match this view.')+'</div>'}`}
+function sCards(){const as=actions.filter(a=>a.status!='DRAFT'||1);return as}
+function admin(){
+ const isA=S.role=='admin';const pub=actions.filter(a=>a.status!='DRAFT');let tot={n:0,c:0,o:0,p:0};pub.forEach(a=>{const x=stats(a);for(const k in tot)tot[k]+=x[k]});
+ const rate=tot.n?Math.round(tot.c/tot.n*100):0;
+ if(S.tab=='create')return create();
+ if(S.tab=='detail'){const a=actions.find(x=>x.id==S.sel),x=stats(a);return`<button class="btn g sm" data-tab="actions">← Back</button><h1 style="margin-top:12px">${esc(a.t)}</h1><p class="mut">${esc(a.ds)}</p><div class="meta"><span>${tl(a.ty)}</span><span>${tgt(a)}</span><span>${new Date(a.dl).toLocaleString()}</span><span class="b ${a.p}">${a.p}</span></div><div class="stats"><div class="st"><b style="color:var(--grn)">${x.c}</b><span>Completed</span></div><div class="st"><b>${x.p}</b><span>Pending</span></div><div class="st"><b style="color:var(--red)">${x.o}</b><span>Overdue</span></div><div class="st"><b>${x.rate}%</b><span>Completion rate</span></div></div><div class="row"><button class="btn" data-rem="${a.id}">Send reminder to pending</button><button class="btn g" data-csv="${a.id}">Export CSV</button></div><h2>Students</h2><div class="wrap"><table><tr><th>Student</th><th>ID</th><th>Status</th></tr>${students.filter(s=>match(a,s)).map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.sid||'')}</td><td><span class="b ${eff(a,s)}">${tl(eff(a,s))}</span></td></tr>`).join('')}</table></div>`}
+ if(S.tab=='actions'){const l=actions.filter(a=>S.fa=='all'||(S.fa=='draft'?a.status=='DRAFT':a.status!='DRAFT'));return`<div class="row"><h1>Actions</h1><span class="sp"></span><button class="btn" data-tab="create">New action</button></div><div class="chips">${['all','published','draft'].map(f=>`<button class="${S.fa==f?'on':''}" data-fa="${f}">${tl(f)}</button>`).join('')}</div>${l.length?`<div class="wrap"><table><tr><th>Title</th><th>Target</th><th>Deadline</th><th>Priority</th><th>Completion</th><th></th></tr>${l.map(a=>{const x=stats(a);return`<tr><td><b>${esc(a.t)}</b><div class="mut" style="font-size:12px">${tl(a.ty)}${a.status=='DRAFT'?' · Draft':''}</div></td><td>${tgt(a)}</td><td>${left(a.dl)}</td><td><span class="b ${a.p}">${a.p}</span></td><td><div class="prog"><i style="width:${x.rate}%"></i></div>${x.rate}% of ${x.n}</td><td><button class="btn g sm" data-view="${a.id}">View</button> ${a.status=='DRAFT'?`<button class="btn sm" data-pub="${a.id}">Publish</button>`:''}${isA?` <button class="btn g sm" data-del="${a.id}">Delete</button>`:''}</td></tr>`}).join('')}</table></div>`:'<div class="empty">No actions created yet.</div>'}`}
+ const byD=DEPTS.map(d=>{let n=0,c=0;pub.forEach(a=>students.filter(s=>s.d==d&&match(a,s)).forEach(s=>{n++;if(eff(a,s)=='COMPLETED')c++}));return{d,n,r:n?Math.round(c/n*100):0}});
+ return`<h1>${isA?'Admin':'Staff'} dashboard</h1><p class="mut">Live view of every assigned action.</p><div class="stats"><div class="st"><b>${students.length}</b><span>Students</span></div><div class="st"><b>${pub.length}</b><span>Active actions</span></div><div class="st"><b style="color:var(--grn)">${tot.c}</b><span>Completed</span></div><div class="st"><b>${tot.p}</b><span>Pending</span></div><div class="st"><b style="color:var(--red)">${tot.o}</b><span>Overdue</span></div><div class="st"><b>${rate}%</b><span>Completion rate</span></div></div>
+ <div class="grid2"><div class="panel"><b>Completion by department</b><div class="bars">${byD.map(x=>`<div><span>${x.d}</span><span class="prog"><i style="width:${x.r}%"></i></span><span>${x.n?x.r+'%':'–'}</span></div>`).join('')}</div></div>
+ <div class="panel"><b>Most overdue actions</b>${pub.map(a=>({a,x:stats(a)})).filter(o=>o.x.o).sort((p,q)=>q.x.o-p.x.o).map(o=>`<div class="row" style="margin:10px 0"><span>${esc(o.a.t)}</span><span class="sp"></span><span class="b OVERDUE">${o.x.o} overdue</span></div>`).join('')||'<p class="mut" style="margin-top:10px">Nothing overdue.</p>'}<div style="margin-top:12px"><button class="btn g sm" data-csv="all">Export report CSV</button></div></div></div>`}
+function create(){const e=S.errs,v=S.draft||{};return`<h1>New action</h1><p class="mut">Publishing assigns it to every matching active student.</p><div class="f" style="margin-top:16px">
+ <label class="w">Title<input id="t" value="${esc(v.t||'Internship Registration Form')}">${e.t?`<span class="err">${e.t}</span>`:''}</label>
+ <label class="w">Description<textarea id="ds" rows="3">${esc(v.ds||'Fill the internship preference form before the deadline.')}</textarea>${e.ds?`<span class="err">${e.ds}</span>`:''}</label>
+ <label>Type<select id="ty">${['GOOGLE_FORM','ASSIGNMENT','REGISTRATION','DOCUMENT_SUBMISSION','SURVEY','EXAM_REGISTRATION','EVENT_REGISTRATION','INTERNSHIP','SCHOLARSHIP','OTHER'].map(x=>`<option value="${x}">${tl(x)}</option>`).join('')}</select></label>
+ <label>External URL<input id="u" placeholder="https://forms.gle/…" value="https://forms.gle/example">${e.u?`<span class="err">${e.u}</span>`:''}</label>
+ <label>Deadline<input id="dl" type="datetime-local" value="${new Date(Date.now()+D-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16)}">${e.dl?`<span class="err">${e.dl}</span>`:''}</label>
+ <label>Priority<select id="p">${['LOW','NORMAL','MEDIUM','HIGH','URGENT'].map(x=>`<option ${x=='HIGH'?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Department<select id="d"><option value="">All</option>${DEPTS.map(x=>`<option ${x=='CSE'?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Year<select id="y"><option value="">All</option>${[1,2,3,4].map(x=>`<option ${x==2?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Section<select id="s"><option value="">All</option><option selected>A</option><option>B</option></select></label>
+ <label class="w" style="flex-direction:row;align-items:center"><input type="checkbox" id="v"> Require staff verification after submission</label></div>
+ <div class="row" style="margin-top:16px"><button class="btn" data-save="PUBLISHED">Publish</button><button class="btn g" data-save="DRAFT">Save draft</button></div>`}
+const USERS=[];
+function loginView(){return`<div style="min-height:100vh;display:grid;place-items:center;padding:16px"><div class="panel" style="width:100%;max-width:400px"><div class="logo" style="margin-bottom:14px"><i>S</i>StudentHub</div><h1 style="font-size:22px">Sign in</h1><p class="mut">Use your institutional email.</p><form id="lf" class="f" style="grid-template-columns:1fr;margin-top:14px" novalidate><label>Email<input id="em" type="email" autocomplete="username" value="${esc(S.em||'')}"></label><label>Password<input id="pw" type="password" autocomplete="current-password"></label>${S.lerr?`<span class="err" role="alert">${S.lerr}</span>`:''}<button class="btn" type="submit">Sign in</button><button type="button" class="btn g sm" data-forgot>Forgot password?</button><button type="button" class="btn g sm" data-mode="reg">Create an account</button></form></div></div>`}
+function render(){if(!S.user){$('#app').innerHTML=S.mode=='reg'?regView():loginView();return}const st=S.role=='student',tabs=st?[['home','My actions'],['history','History']]:[['home','Dashboard'],['actions','Actions'],['create','Create action']];
+ const un=notes.filter(n=>!n.r).length;
+ $('#app').innerHTML=`<header><div class="bar"><div class="logo"><i>S</i>StudentHub</div><span class="sp"></span><span class="mut" style="font-size:13px">${esc(S.user.name)} · ${tl(S.role)}</span><button class="btn g sm" data-logout>Sign out</button>${st?`<button class="ib" data-n aria-label="Notifications">🔔${un?`<span class="dot">${un}</span>`:''}</button>`:''}<button class="ib" data-theme aria-label="Toggle dark mode">◐</button></div><nav>${tabs.map(([k,l])=>`<button class="${S.tab==k||(k=='actions'&&S.tab=='detail')?'on':''}" data-tab="${k}">${l}</button>`).join('')}</nav></header><main>${st?student():admin()}</main>
+ ${S.notif?`<div class="ov" data-close style="justify-content:end;place-items:stretch end;padding:0"></div><aside class="drawer" role="dialog" aria-label="Notifications"><div class="row"><b style="font-size:17px">Notifications</b><span class="sp"></span><button class="btn g sm" data-readall>Mark all read</button><button class="btn g sm" data-close>Close</button></div><div class="panel" style="margin:12px 0"><b>Phone alerts</b><p class="mut" style="font-size:13px">Get new actions and deadline reminders as device notifications and text messages.</p><input id="ph" type="tel" aria-label="Mobile number" placeholder="+919876543210" value="${esc(S.ph||'')}" style="width:100%;margin:8px 0;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 10px"><span class="err" id="pherr" role="alert"></span><div class="row"><button class="btn sm" data-enable>${S.nOn?'Update number':'Enable notifications'}</button>${S.nOn?'<button class="btn g sm" data-disable>Turn off</button>':''}</div><p class="mut" style="font-size:12px;margin-top:8px">Texts are queued for an SMS provider to send. Device alerts show while StudentHub is open.</p></div>${notes.length?notes.map(n=>`<div class="nt ${n.r?'':'u'}" data-read="${n.id}"><div>${esc(n.t)}</div><small class="mut">${n.time}</small></div>`).join(''):'<p class="mut">No new notifications.</p>'}</aside>`:''}
+ ${S.mod?(a=>`<div class="ov" data-close><div class="modal" role="dialog" aria-label="${esc(a.t)}" onclick="event.stopPropagation()"><h2 style="margin-top:0">${esc(a.t)}</h2><p class="mut">${esc(a.ds)}</p><div class="flow" style="margin:14px 0">1 Open form → 2 Fill it in → 3 Come back and confirm</div>${a.u?`<a class="btn" style="display:inline-block;text-decoration:none" href="${esc(a.u)}" target="_blank" rel="noopener" data-opened>Open form</a>`:''} <button class="btn g" data-submit="${a.id}">I submitted</button> <button class="btn g" data-close>Cancel</button>${a.v?'<p class="mut" style="margin-top:10px;font-size:13px">Staff will verify your submission before it counts as completed.</p>':''}</div></div>`)(actions.find(x=>x.id==S.mod)):''}`}
+async function save(status){const g=i=>$('#'+i).value.trim(),e={};const o={t:g('t'),ds:g('ds'),ty:g('ty'),u:g('u'),dl:new Date($('#dl').value).getTime(),p:g('p'),d:g('d'),y:+g('y')||'',s:g('s'),v:$('#v').checked};
+ if(o.t.length<3)e.t='Enter a title of at least 3 characters.';if(!o.ds)e.ds='Add a short description.';
+ if(o.u&&!/^https?:\/\/\S+\.\S+/.test(o.u))e.u='Enter a valid URL starting with https://';if(!o.dl||isNaN(o.dl))e.dl='Choose a deadline.';
+ S.draft=o;S.errs=e;if(Object.keys(e).length)return render();
+ S.errs={};S.draft=null;
+ const{data,error}=await sb.from('actions').insert({title:o.t,description:o.ds,action_type:o.ty,external_url:o.u||null,deadline:new Date(o.dl).toISOString(),priority:o.p,requires_verification:o.v,target_department:o.d||null,target_year:o.y||null,target_section:o.s||null,created_by:S.user.id,status:'DRAFT'}).select().single();
+ if(error)return toast('Could not save the action.');
+ if(status=='PUBLISHED'){const r=await sb.rpc('publish_action',{p_id:data.id});if(r.error)return toast('Saved, but publishing failed.');toast('Published to '+r.data+' students')}else toast('Draft saved');
+ await load();S.tab='actions';render()}
+function csv(id){const rows=[['Action','Student','Student ID','Department','Year','Section','Status']];(id=='all'?actions:actions.filter(a=>a.id==id)).filter(a=>a.status!='DRAFT').forEach(a=>students.filter(s=>match(a,s)).forEach(s=>rows.push([a.t,s.name,s.sid,s.d,s.y,s.s,eff(a,s)])));
+ const b=new Blob([rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'}),l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='studenthub-report.csv';l.click()}
+document.addEventListener('click',e=>{const t=e.target.closest('button,a,[data-close],[data-read]');if(!t)return;const d=t.dataset;
+ if('logout'in d){sb.auth.signOut();ch.forEach(c=>sb.removeChannel(c));ch=[];S.user=null;me=null;S.lerr='';S.notif=false;S.mod=null}else if('enable'in d){enableAlerts();return}else if('disable'in d){disableAlerts();return}else if('forgot'in d){const fe=($('#em').value||'').trim();if(!fe){toast('Enter your email first.');return}sb.auth.resetPasswordForEmail(fe,{redirectTo:location.href.split('#')[0]}).then(()=>toast('If that email exists, a reset link is on its way.'));return}else if(d.mode!==undefined){S.mode=d.mode;S.lerr=''}else if(d.tab)S.tab=d.tab;else if(d.f)S.f=d.f;else if(d.fa)S.fa=d.fa;
+ else if(d.open!==undefined)S.mod=d.open;else if('close'in d)S.mod=null,S.notif=false;
+ else if('n'in d)S.notif=true;else if('readall'in d){notes.forEach(n=>n.r=true);sb.from('notifications').update({is_read:true}).eq('student_id',S.user.id).then(()=>{})}else if(d.read){notes.find(n=>n.id==d.read).r=true;sb.from('notifications').update({is_read:true}).eq('id',d.read).then(()=>{})}
+ else if('theme'in d){const r=document.documentElement,dk=getComputedStyle(r).getPropertyValue('--bg').trim()=='#0F1613';r.dataset.theme=dk?'light':'dark'}
+ else if(d.submit){const a=actions.find(x=>x.id==d.submit);S.mod=null;sb.rpc('submit_action',{p_id:a.id}).then(r=>{toast(r.error?'Could not submit. Try again.':a.v?'Submitted. Waiting for staff to verify.':'Marked complete. Reminders stopped.');load()})}
+ else if(d.view){S.sel=d.view;S.tab='detail'}else if(d.pub){sb.rpc('publish_action',{p_id:d.pub}).then(r=>{toast(r.error?'Publishing failed.':'Published to '+r.data+' students');load()});return}
+ else if(d.del){if(confirm('Delete this action? This cannot be undone.')){sb.from('actions').delete().eq('id',d.del).then(r=>{toast(r.error?'Could not delete.':'Deleted');load()})}}
+ else if(d.save){save(d.save);return}else if(d.rem){sb.rpc('send_reminder',{p_id:d.rem}).then(r=>{toast(r.error?(/recent/.test(r.error.message)?'A reminder went out recently. Try again later.':'Could not send reminders.'):'Reminder sent to '+r.data+' students');load()});return}
+ else if(d.csv){csv(d.csv);return}else return;render()});
+document.addEventListener('input',e=>{if(e.target.id=='q'){S.q=e.target.value;const p=e.target.selectionStart;render();const q=$('#q');q.focus();q.setSelectionRange(p,p)}});
+document.addEventListener('change',e=>{if(e.target.id=='sort'){S.sort=e.target.value;render()}});
+const SB_URL='https://jevpvztqasnxpwncdyvt.supabase.co',SB_KEY='sb_publishable_fGWQpv5aYRcr4bypUmrejw_-Z_U6ST9';
+const sb=supabase.createClient(SB_URL,SB_KEY);let ch=[];
+const ts=v=>v?new Date(v).getTime():0,fd=v=>new Date(v).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+ ago=v=>{const m=Math.round((Date.now()-new Date(v))/6e4);return m<1?'just now':m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago'};
+async function load(){if(!S.user)return;
+ const[a,p,x,n]=await Promise.all([sb.from('actions').select('*').order('created_at'),sb.from('profiles').select('*').eq('role','STUDENT'),sb.from('student_actions').select('*'),sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(50)]);
+ if(a.error||p.error||x.error){toast('Could not load data. Check your connection.');return}
+ actions=a.data.map(r=>({id:r.id,t:r.title,ds:r.description,ty:r.action_type,u:r.external_url||'',dl:ts(r.deadline),p:r.priority,d:r.target_department||'',y:r.target_year||'',s:r.target_section||'',v:r.requires_verification,status:r.status,c:ts(r.created_at)}));
+ students=p.data.map(r=>({id:r.id,sid:r.student_id,name:r.full_name,d:r.department,y:r.year,s:r.section}));
+ sa={};x.data.forEach(r=>{const t=r.completed_at||r.submitted_at;sa[r.student_id+':'+r.action_id]={st:r.status,at:t?fd(t):''}});
+ notes=(n.data||[]).map(r=>({id:r.id,t:r.message,time:ago(r.created_at),r:r.is_read}));
+ if(S.role=='student')me=students.find(s=>s.id==S.user.id)||me;
+ const ae=document.activeElement;if(!(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName)))render()}
+function live(){if(ch.length)return;const c=sb.channel('sh');
+ ['actions','student_actions','profiles'].forEach(t=>c.on('postgres_changes',{event:'*',schema:'public',table:t},()=>load()));
+ c.on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},pl=>{if(pl.new.student_id==S.user.id&&S.nOn)pushNote('StudentHub',pl.new.message);load()});c.subscribe();ch=[c]}
+async function start(id){const{data:p}=await sb.from('profiles').select('*').eq('id',id).single();
+ if(!p){await sb.auth.signOut();S.user=null;return render()}
+ S.user={id:p.id,name:p.full_name,e:p.email};S.role=p.role.toLowerCase();S.tab='home';S.mode='';S.ph=p.phone||'';S.nOn=!!p.notify;
+ await load();render();live();if(S.role=='student')setTimeout(()=>catchUp(true),1500)}
+async function boot(){const{data:{session}}=await sb.auth.getSession();if(session)await start(session.user.id);else render()}
+sb.auth.onAuthStateChange(ev=>{if(ev=='PASSWORD_RECOVERY'){const np=prompt('Enter your new password (8+ characters, with a letter and a number)');if(np&&np.length>=8)sb.auth.updateUser({password:np}).then(r=>toast(r.error?'Could not change the password.':'Password updated.'))}});
+function regView(){return`<div style="min-height:100vh;display:grid;place-items:center;padding:16px"><div class="panel" style="width:100%;max-width:440px"><div class="logo" style="margin-bottom:14px"><i>S</i>StudentHub</div><h1 style="font-size:22px">Create your account</h1><p class="mut">Register once, then sign in with the same email and password.</p><form id="rf" class="f" style="grid-template-columns:1fr 1fr;margin-top:14px" novalidate>
+<label class="w">Full name<input id="rn" autocomplete="name"></label><label class="w">Email<input id="re" type="email" autocomplete="username"></label>
+<label>Password<input id="rp" type="password" autocomplete="new-password" placeholder="8+ chars, letter and number"></label><label>Confirm password<input id="rc" type="password" autocomplete="new-password"></label>
+<label class="w">I am a<select id="rr"><option value="student">Student</option><option value="staff">Staff</option><option value="admin">Admin</option></select></label>
+<label class="stf">Student ID<input id="rs" placeholder="23CS021"></label><label class="stf">Department<select id="rd">${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select></label><label class="stf">Year<select id="ry">${[1,2,3,4].map(y=>`<option>${y}</option>`).join('')}</select></label><label class="stf">Section<select id="rx"><option>A</option><option>B</option></select></label>
+<label class="w inv" style="display:none">Invite code<input id="ri" placeholder="Given by your institution"></label>
+<span class="err w" id="rerr" role="alert"></span><button class="btn w" type="submit">Create account</button><button type="button" class="btn g sm w" data-mode="">Back to sign in</button></form></div></div>`}
+document.addEventListener('change',e=>{if(e.target.id!='rr')return;const st=e.target.value=='student';document.querySelectorAll('.stf').forEach(x=>x.style.display=st?'flex':'none');document.querySelector('.inv').style.display=st?'none':'flex'});
+document.addEventListener('submit',async e=>{if(e.target.id!='rf')return;e.preventDefault();
+ const g=i=>$('#'+i).value.trim(),fail=m=>{$('#rerr').textContent=m},n=g('rn'),em=g('re').toLowerCase(),pw=$('#rp').value,r=g('rr'),sid=g('rs').toUpperCase();
+ if(n.length<2)return fail('Enter your full name.');if(!/^\S+@\S+\.\S+$/.test(em))return fail('Enter a valid email address.');
+ if(pw.length<8||!/[A-Za-z]/.test(pw)||!/\d/.test(pw))return fail('Use a password with 8+ characters, including a letter and a number.');
+ if(pw!==$('#rc').value)return fail('Passwords do not match.');
+ if(r=='student'&&!/^[A-Z0-9]{5,12}$/.test(sid))return fail('Enter a valid student ID, like 23CS021.');
+ if(r!='student'&&!g('ri'))return fail('Enter your invite code.');
+ const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{full_name:n,role:r.toUpperCase(),student_id:sid,department:g('rd'),year:+g('ry'),section:g('rx'),invite:g('ri')}}});
+ if(error)return fail(/already/i.test(error.message)?'An account with this email already exists. Sign in instead.':/database/i.test(error.message)?'The invite code is wrong, or this student ID is already registered.':error.message);
+ if(data.session){await start(data.user.id);toast('Account created');return}
+ S.mode='';S.em=em;S.lerr='Account created. Confirm it from your email, then sign in.';render()});
+async function enableAlerts(){const v=$('#ph').value.replace(/[\s-]/g,''),er=m=>$('#pherr').textContent=m;
+ if(!/^\+[1-9]\d{9,14}$/.test(v))return er('Enter your number with country code, like +919876543210.');
+ let perm='unsupported';try{perm=await Notification.requestPermission()}catch(x){}
+ const r=await sb.rpc('update_prefs',{p_phone:v,p_notify:true});if(r.error)return er('Could not save. Try again.');
+ S.ph=v;S.nOn=true;render();toast(perm=='granted'?'Notifications enabled for '+v:'Text alerts enabled. Allow browser notifications for device alerts.')}
+async function disableAlerts(){await sb.rpc('update_prefs',{p_phone:S.ph||'',p_notify:false});S.nOn=false;render();toast('Notifications turned off')}
+async function pushNote(title,body,tag){
+ if(!window.Notification||Notification.permission!='granted')return false;
+ try{const r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r){await r.showNotification(title,{body,tag,icon:'icon.svg',badge:'icon.svg'});return true}}catch(e){}
+ try{new Notification(title,{body,tag});return true}catch(e){return false}}
+let lastCU=0;
+function catchUp(force){if(!S.user||S.role!='student'||!S.nOn||!me)return;if(!force&&Date.now()-lastCU<6e5)return;
+ const pend=mine().filter(o=>o.lv!='DONE'),hot=pend.filter(o=>o.lv=='URGENT'||o.lv=='OVERDUE'),un=notes.filter(n=>!n.r).length;
+ if(!pend.length&&!un)return;lastCU=Date.now();
+ pushNote('Welcome back to StudentHub',pend.length+' pending action'+(pend.length==1?'':'s')+(hot.length?', '+hot.length+' urgent or overdue':'')+(un?', '+un+' unread':''),'catchup')}
+addEventListener('online',()=>{toast('Back online');setTimeout(()=>catchUp(true),800)});
+addEventListener('offline',()=>toast('You are offline. Alerts arrive when you reconnect.'));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)catchUp()});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+let fails=0,lock=0;
+document.addEventListener('submit',async e=>{if(e.target.id!='lf')return;e.preventDefault();
+ const em=$('#em').value.trim().toLowerCase(),pw=$('#pw').value;S.em=em;
+ if(Date.now()<lock){S.lerr='Too many attempts. Try again in '+Math.ceil((lock-Date.now())/1000)+' seconds.';return render()}
+ if(!/^\S+@\S+\.\S+$/.test(em)||!pw){S.lerr='Enter a valid email and your password.';return render()}
+ const{data,error}=await sb.auth.signInWithPassword({email:em,password:pw});
+ if(error){if(++fails>=5){lock=Date.now()+3e4;fails=0}S.lerr=/confirm/i.test(error.message)?'Confirm your email first, then sign in.':'Email or password is incorrect.';return render()}
+ fails=0;S.lerr='';await start(data.user.id);toast('Signed in')});
+S.user=null;boot();
+</script></body></html>
