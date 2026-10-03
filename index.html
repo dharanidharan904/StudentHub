@@ -170,7 +170,7 @@ document.addEventListener('submit',async e=>{if(e.target.id!='rf')return;e.preve
  if(pw!==$('#rc').value)return fail('Passwords do not match.');
  if(r=='student'&&!/^[A-Z0-9]{5,12}$/.test(sid))return fail('Enter a valid student ID, like 23CS021.');
  if(r!='student'&&!g('ri'))return fail('Enter your invite code.');
- const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{full_name:n,role:r.toUpperCase(),student_id:sid,department:g('rd'),year:+g('ry'),section:g('rx'),invite:g('ri')}}});
+ const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:location.href.split('#')[0].split('?')[0],data:{full_name:n,role:r.toUpperCase(),student_id:sid,department:g('rd'),year:+g('ry'),section:g('rx'),invite:g('ri')}}});
  if(error)return fail(/already/i.test(error.message)?'An account with this email already exists. Sign in instead.':/database/i.test(error.message)?'The invite code is wrong, or this student ID is already registered.':error.message);
  if(data.session){await start(data.user.id);toast('Account created');return}
  S.mode='';S.em=em;S.lerr='Account created. Confirm it from your email, then sign in.';render()});
