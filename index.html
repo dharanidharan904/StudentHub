@@ -133,6 +133,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,a,[data-c
 document.addEventListener('input',e=>{if(e.target.id=='q'){S.q=e.target.value;const p=e.target.selectionStart;render();const q=$('#q');q.focus();q.setSelectionRange(p,p)}});
 document.addEventListener('change',e=>{if(e.target.id=='sort'){S.sort=e.target.value;render()}});
 const SB_URL='https://jevpvztqasnxpwncdyvt.supabase.co',SB_KEY='sb_publishable_fGWQpv5aYRcr4bypUmrejw_-Z_U6ST9';
+const VAPID_PUBLIC='BN3VWU89azDwz689PN_lloFZw34PA7SO78lR0CothSL832rIaepnqLeYNy8buotUsbzRDBVcMIbhlJ_7RrZhNpk';
 const sb=supabase.createClient(SB_URL,SB_KEY);let ch=[];
 const ts=v=>v?new Date(v).getTime():0,fd=v=>new Date(v).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
  ago=v=>{const m=Math.round((Date.now()-new Date(v))/6e4);return m<1?'just now':m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago'};
@@ -147,10 +148,10 @@ async function load(){if(!S.user)return;
  const ae=document.activeElement;if(!(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName)))render()}
 function live(){if(ch.length)return;const c=sb.channel('sh');
  ['actions','student_actions','profiles'].forEach(t=>c.on('postgres_changes',{event:'*',schema:'public',table:t},()=>load()));
- c.on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},pl=>{if(pl.new.student_id==S.user.id&&S.nOn)pushNote('StudentHub',pl.new.message);load()});c.subscribe();ch=[c]}
+ c.on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},pl=>{if(pl.new.student_id==S.user.id&&S.nOn)pushNote('StudentHub',pl.new.message,pl.new.id);load()});c.subscribe();ch=[c]}
 async function start(id){const{data:p}=await sb.from('profiles').select('*').eq('id',id).single();
  if(!p){await sb.auth.signOut();S.user=null;return render()}
- S.user={id:p.id,name:p.full_name,e:p.email};S.role=p.role.toLowerCase();S.tab='home';S.mode='';S.ph=p.phone||'';S.nOn=!!p.notify;
+ S.user={id:p.id,name:p.full_name,e:p.email};S.role=p.role.toLowerCase();S.tab='home';S.mode='';S.ph=p.phone||'';S.nOn=!!p.notify;setTimeout(subscribePush,1500);
  await load();render();live();if(S.role=='student')setTimeout(()=>catchUp(true),1500)}
 async function boot(){const{data:{session}}=await sb.auth.getSession();if(session)await start(session.user.id);else render()}
 sb.auth.onAuthStateChange(ev=>{if(ev=='PASSWORD_RECOVERY'){const np=prompt('Enter your new password (8+ characters, with a letter and a number)');if(np&&np.length>=8)sb.auth.updateUser({password:np}).then(r=>toast(r.error?'Could not change the password.':'Password updated.'))}});
@@ -177,8 +178,17 @@ async function enableAlerts(){const v=$('#ph').value.replace(/[\s-]/g,''),er=m=>
  if(!/^\+[1-9]\d{9,14}$/.test(v))return er('Enter your number with country code, like +919876543210.');
  let perm='unsupported';try{perm=await Notification.requestPermission()}catch(x){}
  const r=await sb.rpc('update_prefs',{p_phone:v,p_notify:true});if(r.error)return er('Could not save. Try again.');
+ if(perm=='granted')await subscribePush();
  S.ph=v;S.nOn=true;render();toast(perm=='granted'?'Notifications enabled for '+v:'Text alerts enabled. Allow browser notifications for device alerts.')}
-async function disableAlerts(){await sb.rpc('update_prefs',{p_phone:S.ph||'',p_notify:false});S.nOn=false;render();toast('Notifications turned off')}
+async function disableAlerts(){await unsubscribePush();await sb.rpc('update_prefs',{p_phone:S.ph||'',p_notify:false});S.nOn=false;render();toast('Notifications turned off')}
+function b64u(x){const p='='.repeat((4-x.length%4)%4),b=atob((x+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+async function subscribePush(){try{
+ if(!('serviceWorker'in navigator)||!('PushManager'in window)||!window.Notification||Notification.permission!='granted'||VAPID_PUBLIC.startsWith('PASTE'))return false;
+ const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+ if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUBLIC)});
+ const j=sub.toJSON();const r=await sb.rpc('save_push_sub',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth});return !r.error}catch(e){return false}}
+async function unsubscribePush(){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
+ if(sub){await sb.rpc('remove_push_sub',{p_endpoint:sub.endpoint});await sub.unsubscribe()}}catch(e){}}
 async function pushNote(title,body,tag){
  if(!window.Notification||Notification.permission!='granted')return false;
  try{const r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r){await r.showNotification(title,{body,tag,icon:'icon.svg',badge:'icon.svg'});return true}}catch(e){}
