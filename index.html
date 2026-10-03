@@ -133,7 +133,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,a,[data-c
 document.addEventListener('input',e=>{if(e.target.id=='q'){S.q=e.target.value;const p=e.target.selectionStart;render();const q=$('#q');q.focus();q.setSelectionRange(p,p)}});
 document.addEventListener('change',e=>{if(e.target.id=='sort'){S.sort=e.target.value;render()}});
 const SB_URL='https://jevpvztqasnxpwncdyvt.supabase.co',SB_KEY='sb_publishable_fGWQpv5aYRcr4bypUmrejw_-Z_U6ST9';
-const VAPID_PUBLIC='BN3VWU89azDwz689PN_lloFZw34PA7SO78lR0CothSL832rIaepnqLeYNy8buotUsbzRDBVcMIbhlJ_7RrZhNpkgit add .';
+const VAPID_PUBLIC='BN3VWU89azDwz689PN_lloFZw34PA7SO78lR0CothSL832rIaepnqLeYNy8buotUsbzRDBVcMIbhlJ_7RrZhNpk';
 const sb=supabase.createClient(SB_URL,SB_KEY);let ch=[];
 const ts=v=>v?new Date(v).getTime():0,fd=v=>new Date(v).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
  ago=v=>{const m=Math.round((Date.now()-new Date(v))/6e4);return m<1?'just now':m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago'};
